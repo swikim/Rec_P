@@ -1,24 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Main from './pages/Main';
+import Calculator from './pages/Calculator';
+import Navbar from './components/Navbar';
+import Weather from './pages/Weather'
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      {/* Router를 중첩해 Navbar가 있는 컴포넌트를 만들어볼까요?*/}
+      <Navbar />
+      <Routes>
+
+        {/* Navbar가 있는 컴포넌트를 만들어볼까요?*/}
+        <Route>
+          <Route path='/' element={<Main />} />
+          {/* 라우팅을 동적으로 관리하고싶어요 "1" 대신 들어가야 할게 뭘까요?*/}
+          
+        </Route>
+        <Route path='/Calculator' element={<Calculator />} />
+        <Route path='/Weather' element={<Weather />}/>
+
+       
+      </Routes>
+    </BrowserRouter>
   );
 }
 
