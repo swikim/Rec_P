@@ -53,3 +53,8 @@ body {
   padding: 5px;
   border-bottom: 1px solid grey
 }
+
+.calculator-card{
+  width: 30%;
+  height: 20%;
+}

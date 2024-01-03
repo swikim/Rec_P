@@ -27,6 +27,7 @@ const NavBar = ()=>{
           <Nav>
             <Link to={'/'}>홈</Link>
             <Link to={'/calculator'}>계산기</Link>
+            <Link to={'weather'}>날씨</Link>
           </Nav>
         </Header>
       );

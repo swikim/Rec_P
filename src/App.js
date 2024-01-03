@@ -17,7 +17,7 @@ function App() {
           
         </Route>
         <Route path='/Calculator' element={<Calculator />} />
-        <Route path='/Weather' element={<Weather />}/>
+        <Route path='/Weather' element={<Weather />} />
 
        
       </Routes>
