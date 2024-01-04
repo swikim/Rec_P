@@ -1,4 +1,5 @@
 import React from "react";
+import './Weather.css';
 import { useState } from "react";
 import { Card ,Text, Metric ,Button, TabGroup,TabList,Tab,DatePicker,DatePickerValue} from "@tremor/react";
 function Weather (){
@@ -8,6 +9,22 @@ function Weather (){
     const [selectDate, setSelectDate] = useState(null);
 
     const [urlDate, setUrlDate] = useState("");
+    const default_date = new Date();
+
+    function new_Date(date){
+        const year = date.getFullYear().toString();
+        let month = (date.getMonth()+1).toString();
+        const day = date.getDate().toString();
+
+        if(month.length < 2){month = "0" + month}
+
+        const today_date = year+month+day;
+        return today_date;
+    }
+    const toDay = new_Date(default_date);
+    
+
+    
 
     const handleDateChange = (newDate) =>{
         setSelectDate(newDate);
@@ -16,9 +33,10 @@ function Weather (){
         const parsedDate = new Date(newDate);
         const year = parsedDate.getFullYear().toString();
         let month = (parsedDate.getMonth() + 1).toString(); // 월은 0부터 시작하므로 +1 해줌
-        const day = parsedDate.getDate().toString();
+        let day = parsedDate.getDate().toString();
        
-        if(month.length < 2){month = "0" + month}
+        if(month.length < 2){month = "0" + month};
+        if(day.length<2){day = "0" + day};
         const urlDate_in = year+month+day;
         
         setUrlDate(urlDate_in);
@@ -28,17 +46,29 @@ function Weather (){
 
      //날씨
      const num = '112';
-     const apiKey = 'yoDxAeXuxWRtQ%2BxEhRsJ0aFpqAVIInugpacEw9CJlopBLfc78UtjrXoR2KwMDtIrOtPL33SSz%2FdjDYI08s1%2Ffw%3D%3D'; 
-     const apiUrl = `https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList?serviceKey=${apiKey}&pageNo=1&numOfRows=10&dataType=JSON&dataCd=ASOS&dateCd=DAY&startDt=20230101&endDt=20230102&stnIds=${num}`;
+     const apiKey = 'yoDxAeXuxWRtQ%2BxEhRsJ0aFpqAVIInugpacEw9CJlopBLfc78UtjrXoR2KwMDtIrOtPL33SSz%2FdjDYI08s1%2Ffw%3D%3D';  
+     const dayApiUrl = `https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList?serviceKey=${apiKey}&pageNo=1&numOfRows=10&dataType=JSON&dataCd=ASOS&dateCd=DAY&startDt=${urlDate}&endDt=${urlDate}&stnIds=${num}`;
 
 
-   const checkDate=()=>{ console.log(selectDate,apiUrl);    };
+     const [regionN, setRegionN] = useState('');
+
+     fetch(dayApiUrl)
+        .then(response => response.json())
+        .then(data =>{
+            console.log(data.response.body.items.item[0].sumSsHr);
+            setRegionN(data.response.body.items.item[0].sumSsHr);
+        })
+        .catch(error => console.error(error));
+
+
+   const checkDate=()=>{ console.log(selectDate,dayApiUrl,urlDate,regionN);    };
 
     return(
        <div>
         <div className="flex">
             <Button>전년동월</Button>
-            <DatePicker onValueChange={handleDateChange} />
+            <DatePicker onValueChange={handleDateChange}
+            defaultValue={new Date()} />
 
             <Button onClick={checkDate}>확인</Button>
 
@@ -64,8 +94,11 @@ function Weather (){
                 </TabList>
             </TabGroup>
         </div>
+        <div className="image-container">
             <img src="/koreamap.png" 
             style={{width : '800px' , height : '800px'}}/>
+            <div className="text-on-image"><h2>일조량 : {regionN}</h2></div>
+        </div>
 
         </div>
        </div>
