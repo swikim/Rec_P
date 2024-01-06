@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import styled from "@emotion/styled";
 import {DragDropContext,Droppable,Draggable} from "react-beautiful-dnd"
 import { useState } from "react";
+import { Card ,Button , Text, DatePicker,DateRangePicker, DateRangePickerItem, Metric, LineChart, ValueFormatter } from "@tremor/react";
+
+import { es } from "date-fns/locale";
 
 const DATA = [
     {
@@ -26,12 +29,14 @@ const DATA = [
       id: "487f68b4-1746-438c-920e-d67b7df46247",
       name: "x축",
       items: [
-        
       ],
       tint: 2,
     },
     
   ];
+
+  
+
 
 function Main () {
     const [stores, setstores] = useState(DATA);
@@ -68,6 +73,10 @@ function Main () {
             (store) => store.id === destination.droppableId
         );
 
+        const storeSource = stores.find((store) => store.id === source.droppableId);
+        const storeDestination = stores.find((store) => store.id === destination.droppableId);
+  
+
         const newSourceItems = [...stores[storeSourceIndex].items];
         const newDestinationItems =
         source.droppableId !== destination.droppableId
@@ -91,34 +100,124 @@ function Main () {
 
         setstores(newStores);
 
+        if (
+          storeSource.name === "데이터 항목" &&
+          storeDestination.name === "x축"
+        ) {
+          storeSource.items[itemSourceIndex].bool = true;
+          console.log(storeSource.items[itemSourceIndex].bool);
+        }
+        if(storeSource.name === "x축" && storeDestination.name === "데이터 항목"){
+          storeSource.items[itemSourceIndex].bool = false;
+          console.log(storeSource.items[itemSourceIndex].bool);
+        }
+        
     }
+    
+    //datePicker
+    // const [value, setValue] = useState<DateRangePickerValue>({
+    //   from: new Date(2023, 1, 1),
+    //   to: new Date(),
+    // });
+
+    
+    const [start_Value, setStart_Value] = useState(null);
+    const [end_Value, setEnd_Value] = useState(null);
+
+    const parse_Date =(newDate) =>{
+      const parsedDate = new Date(newDate);
+      const year = parsedDate.getFullYear().toString();
+      let month = (parsedDate.getMonth() + 1).toString(); // 월은 0부터 시작하므로 +1 해줌
+      let day = parsedDate.getDate().toString();
+     
+      if(month.length < 2){month = "0" + month};
+      if(day.length<2){day = "0" + day};
+      const resultDate = year+month+day;
+
+      return resultDate;
+    }
+
+    const handleDateRangeChange = (result) =>{
+      const {from,to} = result;
+      setStart_Value(parse_Date(from));
+      setEnd_Value(parse_Date(to));
+
+      
+      console.log(start_Value,end_Value);
+    }
+
+    const apiKey = 'yoDxAeXuxWRtQ%2BxEhRsJ0aFpqAVIInugpacEw9CJlopBLfc78UtjrXoR2KwMDtIrOtPL33SSz%2FdjDYI08s1%2Ffw%3D%3D'
+    const apiUrl = `https://apis.data.go.kr/B552115/RecMarketInfo2/getRecMarketInfo2?serviceKey=${apiKey}&pageNo=1&numOfRows=30&dataType=json&bzDd=${start_Value}`;
+    
+
+    //체크버튼
+    const checkButton =()=>{console.log(apiUrl,start_Value)};
    
+
+    //차트
+    const chartData =[
+      {
+        date : 20240101,
+        cls : 73000,
+      },
+      {
+        date : 20240102,
+        cls : 72000,
+      },
+    ]
+
+   
+      
+    const valueFormatter = (number) => `$ ${new Intl.NumberFormat("us").format(number).toString()}`;
+
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data =>{
+        console.log(data.response.body.items.item[0].clsPrc);
+        
+      })
+      .catch(error => console.error(error));
+
+  
+    
   return (
     <div>
-        <div className="layout__wrapper">
-            <div className="card">
-                <DragDropContext onDragEnd={handleDragDrop}>
-                    <div className="header">
-                        <h1>가격동향</h1>
-                    </div>
-                    <Droppable droppableId="ROOT" type="group">
-                        {(provided)=>(
-                            <div {...provided.droppableProps} ref={provided.innerRef}>
-                                {stores.map((store, index) =>(
-                                  <Draggable draggableId={store.id} key={store.id} index={index}>
-                                {(provided)=>(
-                                <div className='store-container'{...provided.dragHandleProps} {...provided.draggableProps} ref={provided.innerRef}>
-                                    <StoreList{...store}/>
-                                </div>
-                                )}
-                                </Draggable>
-                                ))}
-                            {provided.placeholder}
+        <div className="Card">
+        <DateRangePicker className="max-w-sm mx-auto" enableSelect={false}
+        onValueChange={handleDateRangeChange} 
+        />;
+        <Card className="flex">
+            <DragDropContext onDragEnd={handleDragDrop}>
+                <div className="header">
+                    <h1>가격동향</h1>
+                </div>
+                <Droppable droppableId="ROOT" type="group">
+                    {(provided)=>(
+                        <div {...provided.droppableProps} ref={provided.innerRef}>
+                            {stores.map((store, index) =>(
+                              <Draggable draggableId={store.id} key={store.id} index={index}>
+                            {(provided)=>(
+                            <div className='store-container'{...provided.dragHandleProps} {...provided.draggableProps} ref={provided.innerRef}>
+                                <StoreList{...store}/>
                             </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
-            </div>
+                            )}
+                            </Draggable>
+                            ))}
+                        {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
+            
+                  
+        
+        </Card>
+           <Card>
+            <Button onClick={checkButton}>check</Button>
+           
+           </Card>
+           
         </div>
     </div>
   );
