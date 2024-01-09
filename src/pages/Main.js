@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import styled from "@emotion/styled";
 import {DragDropContext,Droppable,Draggable} from "react-beautiful-dnd"
 import { useState } from "react";
-import { Card ,Button , Text, DatePicker,DateRangePicker, DateRangePickerItem, Metric, LineChart, ValueFormatter } from "@tremor/react";
+import { Card ,Button , Text, DatePicker,DateRangePicker, DateRangePickerItem, Metric,  } from "@tremor/react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 
 import { es } from "date-fns/locale";
 
@@ -35,8 +36,43 @@ const DATA = [
     
   ];
 
-  
+  const chartData =[
+    {
+      date : 20240101,
+      cls : 73000,
+    },
+    {
+      date : 20240102,
+      cls : 72000,
+    },
+    {
+      date : 20240103,
+      cls : 62000,
+    },
+    {
+      date : 20240104,
+      cls : 71000,
+    },
+  ]
 
+  
+  const customTooltip = ({ payload, active }) => {
+    if (!active || !payload) return null;
+    return (
+      <div className="w-56 rounded-tremor-default text-tremor-default bg-tremor-background p-2 shadow-tremor-dropdown border border-tremor-border">
+        {payload.map((category, idx) => (
+          <div key={idx} className="flex flex-1 space-x-2.5">
+            <div className={`w-1 flex flex-col bg-${category.color}-500 rounded`} />
+            <div className="space-y-1">
+              <p className="text-tremor-content">{category.dataKey}</p>
+              <p className="font-medium text-tremor-content-emphasis">{category.value} bpm</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
 
 function Main () {
     const [stores, setstores] = useState(DATA);
@@ -155,20 +191,10 @@ function Main () {
    
 
     //차트
-    const chartData =[
-      {
-        date : 20240101,
-        cls : 73000,
-      },
-      {
-        date : 20240102,
-        cls : 72000,
-      },
-    ]
+    
 
    
       
-    const valueFormatter = (number) => `$ ${new Intl.NumberFormat("us").format(number).toString()}`;
 
 
     fetch(apiUrl)
@@ -180,7 +206,7 @@ function Main () {
       .catch(error => console.error(error));
 
   
-    
+
   return (
     <div>
         <div className="Card">
@@ -209,13 +235,24 @@ function Main () {
                     )}
                 </Droppable>
             </DragDropContext>
-            
-                  
+            <LineChart
+        width={500}
+        height={300}
+        data={chartData}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <XAxis dataKey="date" label={{ value: 'Date', position: 'insideBottomRight', offset: 0 }} />
+        <YAxis label={{ value: 'CLS Values', angle: -90, position: 'insideLeft' }} />
+        <CartesianGrid strokeDasharray="3 3" />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="cls" stroke="#8884d8" activeDot={{ r: 8 }} />
+      </LineChart>
         
         </Card>
            <Card>
             <Button onClick={checkButton}>check</Button>
-           
+            
            </Card>
            
         </div>
